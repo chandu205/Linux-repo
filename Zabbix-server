@@ -1,0 +1,101 @@
+Step 1: Install Apache Web Server and PHP
+
+1. First, install Apache Web Server alongside with PHP and
+its extensions in order to provide the web backed functionality for Zabbix Server by issuing the following command.
+
+	# yum -y install epel-release
+	# yum install httpd php php-mysql php-ldap php-bcmath- php-mbstring php-gd php-xml php-mcrypt.
+
+2. Next, you need to tune PHP interpreter and adjust some values in order to run Zabbix Server. 
+So, open Apache php.ini configuration file for editing by issuing the following command:
+
+	# vi /etc/php.ini	
+
+Now, search with CTRL+C and replace the following PHP values as it follows:
+
+	max_execution_time 300
+	memory_limit 128M
+	always_populate_raw_post_data -1
+	session.auto_start = 0
+	mbstring.func_overload = 0
+	date.timezone = Asia/kolkata
+
+
+3. After updating PHP configuration file, restart Apache daemon to reflect changes by issuing the following command.
+
+	# systemctl restart httpd.service		 [On RHEL/CentOS 7]
+
+
+Step 2: Install MariaDB Database and Library
+
+	# yum install mariadb-server mariadb-client mariadb-devel	         [On RHEL/CentOS 7]
+
+5. When the installation of Mariadb finishes, secure the database by issuing mysql_secure_installation
+command with system root privileges ( answer with yes for removing anonymous users, disable root login remotely,
+removetest database and access to it and apply all changes).
+
+	# mysql_secure_installation
+6. The next requirement for Zabbix is setting-up a RDBMS database.
+Log in to your LAMP stack database component (MySQL or MariaDB) and 
+create a Zabbix database and the credentials required to manage the database, by issuing the following commands.
+Make sure you replace database name, user and password to match your own settings.
+
+	# mysql -u root -p
+	MariaDB [(none)]> create database zabbixdb character set utf8 collate utf8_bin;
+	MariaDB [(none)]> grant all privileges on zabbixdb.* to 'zabbixuser'@'localhost' identified by 'password1';
+	MariaDB [(none)]> flush privileges;
+	MariaDB [(none)]> exit
+
+
+Step 3: Install Zabbix Server
+
+
+	# rpm -ivh http://repo.zabbix.com/zabbix/3.4/rhel/7/x86_64/zabbix-release-3.4-2.el7.noarch.rpm
+	# yum install zabbix-server-mysql zabbix-web-mysql
+
+	# yum install zabbix-agent    [On RHEL/CentOS 7] 
+
+	# systemctl restart httpd     [On RHEL/CentOS 7] 
+
+Step 4: Configure Zabbix Server and Agent
+
+	# zcat /usr/share/doc/zabbix-server-mysql/create.sql.gz | mysql -u zabbixuser zabbixdb -p
+
+
+11. On the next step, setup Zabbix server by opening the main configuration file for editing with the following command.
+
+	# nano /etc/zabbix/zabbix_server.conf
+
+In zabbix_server.conf file search and modify the following lines as presented in the below excerpt. Update the variables to reflect your own database settings.
+
+	DBHost=localhost
+	DBName=zabbixdb
+	DBUser=zabbixuser
+	DBPassword=password1
+
+12. Finally, save and close Zabbix server configuration file by pressing Ctrl+o and Ctrl+x file and restart Zabbix daemon to apply changes by issuing the below command.
+
+	# systemctl restart zabbix-server.service
+
+13. Next, configure Zabbix Agent configuration file by updating the following lines. First, open the file for editing.
+
+	# nano /etc/zabbix/zabbix_agentd.conf 
+
+Zabbix agent configuration file excerpt:
+
+	Server=127.0.0.1
+	ListenPort=10050
+
+14. Save and close Zabbix agent configuration file and restart Zabbix Agent to reflect changes
+by issuing the following command.
+	
+	# systemctl restart zabbix-agent.service 
+
+Step 5: Install and Configure Zabbix Frontend Interface
+15. Now it’s time to install Zabbix Server Frontend web interface.
+In order to accomplish this step open a browser and navigate to your server IP Address
+using HTTP or HTTPS protocol and the welcome screen should appear. Hit the Next button to move forward.
+
+	http://192.168.1.*/zabbix/setup.php ( mention your System IP  Adress here to load zabbix server)
+	OR
+	https://192.168.1.*/zabbix/setup.php 
