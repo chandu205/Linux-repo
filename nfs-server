@@ -1,0 +1,78 @@
+yum install nfs-utils nfs-utils-lib
+# chkconfig nfs on
+# service rpcbind start
+# service nfs start
+# vi /etc/exports
+/share 192.168.87.158(rw,sync,no_root_squash,no_subtree_check)
+
+
+/share – is the share folder which server wants to share
+192.168.87.158 – is the IP address of the client to whom want to share
+rw – This will all the clients to read and write the files to the share directory.
+sync – which will confirm the shared directory once the changes are committed.
+no_subtree_check – Will prevents the scanning the shared directory, as nfs performs the scans of every share directory, Disabling the subtree check will increase the reliability, but reduces the security.
+no_root_squash – This will all the root user to connect to the designated directory.
+
+Once, we enter the details of the share in config file, run the below command to export them
+# exportfs -a
+
+Configure Client
+Install the required packages to connect to NFS
+
+# yum install nfs-utils nfs-utils-lib -y
+
+
+Creating Mount Point for Share Directory
+
+# mkdir -p /mnt/share
+
+Mounting the Share Directory
+# mount 192.168.87.156:/share /mnt/share/
+
+
+To confirm if the share is mounted or not run the command ‘df -h’, this will show the list of mounted folders
+# df -h
+
+
+To see the list of all the mounted file systems.
+# mount
+
+To Check the NFS Mount
+Create a file and folders in the server share directory
+
+# touch test1
+# mkdir test
+# ls /mnt/share/ -lh
+
+
+To automatically mount the share folder permanently while boot in the client machine, add the entries in the /etc/fstab file
+# vi /etc/fstab
+#
+# /etc/fstab
+# Created by anaconda on Sat Apr 2 00:11:04 2021
+#
+# Accessible filesystems, by reference, are maintained under '/dev/disk'
+# See man pages fstab(5), findfs(8), mount(8) and/or blkid(8) for more info
+#
+/dev/mapper/VolGroup-lv_root / ext4 defaults 1 1
+UUID=1adb2ad5-d0c7-48a5-9b10-f846a3f9258c /boot ext4 defaults 1 2
+/dev/mapper/VolGroup-lv_home /home ext4 defaults 1 2
+/dev/mapper/VolGroup-lv_swap swap swap defaults 0 0
+tmpfs /dev/shm tmpfs defaults 0 0
+devpts /dev/pts devpts gid=5,mode=620 0 0
+sysfs /sys sysfs defaults 0 0
+proc /proc proc defaults 0 0
+192.168.87.156:/share /mnt/share nfs auto,noatime,nolock,bg,nfsvers=3,intr,tcp,actimeo=1800 0 0
+
+This will show the available share on the local machine, so needed to run on the server side.
+
+# showmount -e 192.168.87.156
+
+List all the share files and folders with options on the server
+
+# exportfs -u
+
+
+This will un-export the shared folders or files which are in /etc/exports
+
+# exports -r
