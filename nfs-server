@@ -1,3 +1,4 @@
+# Nfs server instalation and configuration
 yum install nfs-utils nfs-utils-lib
 # chkconfig nfs on
 # service rpcbind start
