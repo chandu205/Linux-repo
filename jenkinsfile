@@ -1,4 +1,3 @@
-#########pipe line as scripi ###########
 pipeline {
  agent any
     stages {
