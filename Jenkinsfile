@@ -1,34 +1,20 @@
-// Declarative //
 pipeline {
-    agent any
-
-    stages {
-        stage('Build') {
-            steps {
-                echo 'Building..'
-            }
-        }
-        stage('Test') {
-            steps {
-                echo 'Testing..'
-            }
-        }
-        stage('Deploy') {
-            steps {
-                echo 'Deploying....'
-            }
-        }
-    }
-}
-// Script //
-node {
-    stage('Build') {
-        echo 'Building....'
-    }
-    stage('Test') {
-        echo 'Building....'
-    }
-    stage('Deploy') {
-        echo 'Deploying....'
-    }
-}
+     agent any
+            stages {
+	stage('Fetch code'){
+	steps {
+		git branch: 'paac', url:'https://github.com/watchip2/https-github.com-devopshydclub-vprofile-project.git'
+		}
+	}
+	stage('Build') {
+	 steps {
+	     sh 'mvn install'
+	}
+	}
+   stage('Test'){
+	steps {
+	    sh 'mvn test'
+	  } 
+	}
+	 }
+	}
